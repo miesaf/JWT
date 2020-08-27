@@ -68,6 +68,16 @@ class AuthController extends Controller
         return $this->respondWithToken(auth()->refresh());
     }
 
+    public function adminTest()
+    {
+        return response()->json(['message' => 'You are admin!']);
+    }
+
+    public function userTest()
+    {
+        return response()->json(['message' => 'You are user!']);
+    }
+
     /**
      * Get the token array structure.
      *

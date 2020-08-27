@@ -22,4 +22,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
+
+    Route::post('iamadmin', 'AuthController@adminTest')->middleware('role.admin');
+    Route::post('iamuser', 'AuthController@userTest')->middleware('role.user');
 });
