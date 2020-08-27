@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use Illuminate\Http\Request;
+use App\Pengguna;
 
 class AuthController extends Controller
 {
@@ -26,7 +27,9 @@ class AuthController extends Controller
     {
         $credentials = request(['username', 'password']);
 
-        if (! $token = auth()->guard('api')->attempt($credentials)) {
+        $pengguna =  Pengguna::select('role')->find(request('username'));
+
+        if (! $token = auth()->guard('api')->claims(['role' => $pengguna->role])->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
