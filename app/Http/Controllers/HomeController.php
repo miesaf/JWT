@@ -13,7 +13,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        //
     }
 
     /**
@@ -24,5 +24,15 @@ class HomeController extends Controller
     public function index()
     {
         return view('home');
+    }
+
+    public function adminTest()
+    {
+        return response()->json(['data' => 'You are admin!']);
+    }
+
+    public function userTest()
+    {
+        return response()->json(['data' => 'You are user!']);
     }
 }
