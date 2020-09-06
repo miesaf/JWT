@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use Hash;
 use Illuminate\Http\Request;
 use App\Pengguna;
 
@@ -15,7 +16,26 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'username' => 'required|string|unique:pengguna',
+            'email' => 'required|string|email|unique:pengguna',
+            'role' => 'required|in:user,admin',
+            'password' => 'required|string|min:8'
+        ]);
+
+        return Pengguna::create([
+            'name' => $request['name'],
+            'username' => $request['username'],
+            'email' => $request['email'],
+            'role' => $request['role'],
+            'password' => Hash::make($request['password']),
+        ]);
     }
 
     /**
