@@ -21,7 +21,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'sendResetEmail']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'sendResetEmail', 'reset']]);
     }
 
     public function register(Request $request)
@@ -145,6 +145,47 @@ class AuthController extends Controller
             }
         } else {
             return response()->json(['status' => false, 'message' => 'User not found or email not matched with login ID.']);
+        }
+    }
+
+    public function reset(Request $request)
+    {
+        $validator = $request->validate([
+            'token'  => 'required|min:1',
+            'password' => 'required|min:6'
+        ]);
+
+        $now = new DateTime();
+
+        $token = DB::table('password_resets')->where('token', $request->token)->first();
+
+        if($token != null) {
+            $T_created = date_format(date_create($token->created_at),"U");
+            $T_now = date_format($now,"U");
+
+            if(($T_now - $T_created) < (60 * 60)) {
+                $updatePword = Pengguna::where('email', $token->email)->first();
+
+                if($updatePword != null) {
+                    $updatePword->password = Hash::make($request->password);
+
+                    $isSaved = $updatePword->save();
+
+                    if($isSaved) {
+                        DB::table('password_resets')->where('token', $request->token)->delete();
+
+                        return response()->json(['status' => true, 'message' => 'New password saved successfully.']);
+                    } else {
+                        return response()->json(['status' => false, 'message' => 'New password failed to be saved.']);
+                    }
+                } else {
+                    return response()->json(['status' => false, 'message' => 'User not found.']);
+                }
+            } else {
+                return response()->json(['status' => false, 'message' => 'Reset password link has expired.']);
+            }
+        } else {
+            return response()->json(['status' => false, 'message' => 'Reset password link is invalid.']);
         }
     }
 }
