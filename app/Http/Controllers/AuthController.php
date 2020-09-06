@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use Auth;
 use Hash;
+use Mail;
+use Str;
+use DB;
 use Illuminate\Http\Request;
+use App\Mail\APIResetPassword;
 use App\Pengguna;
+use Datetime;
 
 class AuthController extends Controller
 {
@@ -16,7 +21,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'sendResetEmail']]);
     }
 
     public function register(Request $request)
@@ -102,5 +107,44 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
+    }
+
+    public function sendResetEmail(Request $request)
+    {
+        $validator = $request->validate([
+            'email'  => 'required|email'
+        ]);
+
+        $acc = Pengguna::select('name')
+                ->where('email', $request->email)
+                ->first();
+
+        if($acc != null) {
+            $token = Str::random(60);
+            $now = new DateTime();
+
+            DB::table('password_resets')->updateOrInsert(
+                ['email' => $request->email],
+                ['token' => $token, 'created_at' => $now->format('Y-m-d H:i:s')]
+            );
+
+            $reset = (object) array();
+
+            //Generate, the password reset link. The token generated is embedded in the link
+            $reset->link = env('APP_FE_URL') . "/reset/$token";
+            $reset->appName = env('APP_NAME');
+            $reset->appURL = env('APP_FE_URL');
+
+            Mail::to($request->email)->send(new APIResetPassword($reset));
+
+            // check for failures
+            if(Mail::failures()) {
+                return response()->json(['status' => false, 'message' => 'Failed to send reset link email.']);
+            } else {
+                return response()->json(['status' => true, 'message' => 'Please check you email for reset link.']);
+            }
+        } else {
+            return response()->json(['status' => false, 'message' => 'User not found or email not matched with login ID.']);
+        }
     }
 }
