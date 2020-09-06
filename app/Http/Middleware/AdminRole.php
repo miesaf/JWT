@@ -15,12 +15,14 @@ class AdminRole
      */
     public function handle($request, Closure $next)
     {
-        $payload = auth()->payload();
-
-        if($payload->get('role') != 'admin') {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        if(auth()->user()->role == "admin") {
+            return $next($request);
+        } else {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => false, 'message' => 'Unauthorized'], 403);
+            } else {
+                return abort(403, "Unauthorized");
+            }
         }
-
-        return $next($request);
     }
 }
