@@ -17,12 +17,14 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
+Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login');
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
+});
 
-    Route::post('iamadmin', 'AuthController@adminTest')->middleware('role.admin');
-    Route::post('iamuser', 'AuthController@userTest')->middleware('role.user');
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::post('iamadmin', 'HomeController@adminTest')->middleware('role.admin');
+    Route::post('iamuser', 'HomeController@userTest')->middleware('role.user');
 });
