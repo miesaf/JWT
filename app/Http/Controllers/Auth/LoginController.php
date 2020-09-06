@@ -38,6 +38,7 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
+    // If want to use username instead of email as primary ID
     public function username()
     {
         return 'username';
