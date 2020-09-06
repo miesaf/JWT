@@ -15,6 +15,7 @@ class Pengguna extends Authenticatable implements JWTSubject
     protected $table = "pengguna";
     // Primary Key
     public $primaryKey = 'username';
+    public $incrementing = false;
     // Timestamps
     public $timestamps = true;
 
