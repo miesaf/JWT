@@ -2,12 +2,12 @@
 
 namespace App;
 
-// use Illuminate\Database\Eloquent\Model;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Pengguna extends Authenticatable
+class Pengguna extends Authenticatable implements JWTSubject
 {
     use Notifiable;
 
@@ -15,6 +15,7 @@ class Pengguna extends Authenticatable
     protected $table = "pengguna";
     // Primary Key
     public $primaryKey = 'username';
+    public $incrementing = false;
     // Timestamps
     public $timestamps = true;
 
@@ -24,7 +25,7 @@ class Pengguna extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'username', 'email', 'password'
+        'name', 'username', 'email', 'role', 'password'
     ];
 
     /**
@@ -49,5 +50,25 @@ class Pengguna extends Authenticatable
     public function getAuthPassword()
     {
       return $this->password;
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }
